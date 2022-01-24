@@ -1,0 +1,6 @@
+# Stuff to ignore #
+
+main.spec
+dist
+build
+__pycache__
