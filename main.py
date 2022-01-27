@@ -33,6 +33,14 @@ DEBUG = True
 REVERSED = False
 PLAYER_WON = False
 idle_img_counter = 0
+
+'''
+    Scales the @param surf object to a set size
+    -----
+    Used by player_sprite_direction_handler()
+'''
+def scale_player_sprite(surf):
+    return pygame.transform.scale(surf, (50, 60))
 idle_img_left_arr = [
     "assets/MascotBunnyCharacter/Bunny1/01-Idle/idle1.png",
     "assets/MascotBunnyCharacter/Bunny1/01-Idle/idle2.png",
@@ -45,9 +53,13 @@ idle_img_left_arr = [
     "assets/MascotBunnyCharacter/Bunny1/01-Idle/idle9.png",
 ]
 idle_img_left = "assets/MascotBunnyCharacter/Bunny1/01-Idle/__Bunny1_Idle_000.png"
+idle_img_left_loaded = scale_player_sprite(pygame.image.load(idle_img_left))
 idle_img_right = "assets/MascotBunnyCharacter/Bunny1/01-Idle/__Bunny1_Idle_000_REVERSE.png"
+idle_img_right_loaded = scale_player_sprite(pygame.image.load(idle_img_right))
 jump_img_left = "assets/MascotBunnyCharacter/Bunny1/06-Jump&Fall/__Bunny1_Fall_000.png"
+jump_img_left_loaded = scale_player_sprite(pygame.image.load(jump_img_left))
 jump_img_right = "assets/MascotBunnyCharacter/Bunny1/06-Jump&Fall/__Bunny1_Fall_000_REVERSED.png"
+jump_img_right_loaded = scale_player_sprite(pygame.image.load(jump_img_right))
 grounded = GROUNDED
 
 '''
@@ -106,13 +118,6 @@ if RANDOMIZEMAP:
         count += 1
         platform_height -= 125
 '''
-    Scales the @param surf object to a set size
-    -----
-    Used by player_sprite_direction_handler()
-'''
-def scale_player_sprite(surf):
-    return pygame.transform.scale(surf, (50, 60))
-'''
     Handle which sprite to use based on playermovement
     ---
     in order to not tax the system (god im just talking out of my ass), a global var is used for not spamming the function
@@ -123,16 +128,20 @@ def player_sprite_direction_handler():
 
     if GROUNDED: # player IDLE
         if not REVERSED:
-            new_img  = scale_player_sprite(pygame.image.load(idle_img_left_arr[idle_img_counter])) # WORKS NOW
+            # new_img  = scale_player_sprite(pygame.image.load(idle_img_left_arr[idle_img_counter])) # WORKS NOW
+            new_img = idle_img_left_loaded
             idle_img_counter +=1
         else:
-            new_img = scale_player_sprite(pygame.image.load(idle_img_right))
+            # new_img = scale_player_sprite(pygame.image.load(idle_img_right))
+            new_img = idle_img_right_loaded
 
     else: # player FALLING/JUMPING
         if not REVERSED:
-            new_img  = scale_player_sprite(pygame.image.load(jump_img_left))
+            # new_img  = scale_player_sprite(pygame.image.load(jump_img_left))
+            new_img = jump_img_left_loaded
         else:
-            new_img = scale_player_sprite(pygame.image.load(jump_img_right))
+            # new_img = scale_player_sprite(pygame.image.load(jump_img_right))
+            new_img = jump_img_right_loaded
 
     return new_img
 # def init_globals():
@@ -148,17 +157,17 @@ def game_loop():
     # init_globals()
     while Game:
         # prevent out of range 
-        global idle_img_counter
+        # global idle_img_counter
         
-        if idle_img_counter +1 >= 8:
-            idle_img_counter = 0
+        # if idle_img_counter +1 >= 8:
+        #     idle_img_counter = 0
         # this needs to be moved into directionhandler func
         player_surface = player_sprite_direction_handler()
 
         '''
             Check win / loose condition
         '''
-        if player.top == 0:
+        if player.top <= 0:
             PLAYER_WON = True
             Game = False
         elif player.bottom == WINHEIGHT:
