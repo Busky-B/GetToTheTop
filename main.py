@@ -191,12 +191,10 @@ def game_loop():
         '''
             Handle reversed state of sprite when player moves right or left
         '''
-        if key_state[pygame.K_k] and not REVERSED:
+        if key_state[pygame.K_k] or key_state[pygame.K_RIGHT] and not REVERSED:
             REVERSED = True
-            # player_surface = change_direction_player_sprite('right')
-        if key_state[pygame.K_j] and REVERSED:
+        if key_state[pygame.K_j] or key_state[pygame.K_LEFT] and REVERSED:
             REVERSED = False
-            # player_surface = change_direction_player_sprite('left')
 
 
         # Should change this to (if not GROUNDED:)
@@ -283,7 +281,7 @@ def game_loop():
 
         time.sleep(0.01)
         # time.sleep(0.018) # Required in order to not make the game move too fast 
-def menu_screen(msg = 'Press any key to start the game . . .', txt_bg_color = BLACK):
+def menu_screen(msg = 'Press any key to start the game . . .', txt_bg_color = BLACK, t_sleep = 0):
     font = pygame.font.SysFont(None, 48)
     startscreen_text = font.render(msg, True, (255,255,255), txt_bg_color)
     startscreen_rect = startscreen_text.get_rect()
@@ -307,11 +305,12 @@ def menu_screen(msg = 'Press any key to start the game . . .', txt_bg_color = BL
                         sys.exit()
         pygame.display.update()
         time.sleep(0.1)
+    time.sleep(t_sleep)
     
 if __name__ == "__main__":
     menu_screen()
     game_loop()
     if PLAYER_WON:
-        menu_screen("You are a Winner!", GREEN)
+        menu_screen("You are a Winner!", GREEN, 2)
     else:
-        menu_screen("Game Over!", RED)
+        menu_screen("Game Over!", RED, 3)
