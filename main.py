@@ -1,4 +1,5 @@
 import random
+from turtle import width
 import pygame, sys, time
 from pygame.locals import *
 
@@ -32,6 +33,7 @@ RANDOMIZEMAP = True
 DEBUG = True
 REVERSED = False
 PLAYER_WON = False
+PLAYER_POINTS = 0
 idle_img_counter = 0
 
 '''
@@ -74,7 +76,7 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 bg = Background(BG_IMG_PATH, [0,0])
 # winSur.blit(pygame.transform.scale(bg.image, (WINWIDTH, WINHEIGHT)), bg.rect)
-#Boxes structure declaration
+# Boxes structure declaration
 # box1 = {'rect': pygame.Rect(10, WINHEIGHT - 200, 50, 60), 'color': WHITE, 'dir': UPRIGHT, 'speed': 4}
 '''
     Creation of inital 3 platforms
@@ -87,10 +89,9 @@ test_rect = test_obst.get_rect()
 test_rect.top = 0
 test_rect.left = 5
 
-obst1 = {'rect': pygame.Rect(10, WINHEIGHT - 150, 100, 50), 'color': RED, 'img': test_obst}
-obst2 = {'rect': pygame.Rect(300, WINHEIGHT - 300, 100, 50), 'color': RED, 'img': test_obst}
-obst3 = {'rect': pygame.Rect(25, WINHEIGHT - 450, 100, 50), 'color': RED, 'img': test_obst}
-# test_rect = {'rect': test_obst.get_rect(), 'surface': test_obst}
+obst1 = {'rect': pygame.Rect(10, WINHEIGHT - 150, 100, 50), 'color': RED, 'img': test_obst, 'jumped_on' : False}
+obst2 = {'rect': pygame.Rect(300, WINHEIGHT - 300, 100, 50), 'color': RED, 'img': test_obst, 'jumped_on' : False}
+obst3 = {'rect': pygame.Rect(25, WINHEIGHT - 450, 100, 50), 'color': RED, 'img': test_obst, 'jumped_on' : False}
 obstacles = [obst1, obst2, obst3]
 
 '''
@@ -102,7 +103,6 @@ obstacles = [obst1, obst2, obst3]
 player_surface = pygame.transform.scale(pygame.image.load(idle_img_left), (50, 60))
 player = player_surface.get_rect() # Creat Rect from the imageSurface
 player.top = WINHEIGHT - 200 # put player starting position at first platform
-
 '''
     Expression for inputing randomized map
     -----
@@ -112,11 +112,21 @@ player.top = WINHEIGHT - 200 # put player starting position at first platform
 if RANDOMIZEMAP:
     # Randomize map
     count = 0
+    previous_obstacle = 2 # since 0, 1 ,2 is hardcoded
     platform_height = WINHEIGHT - 600
     while count < 100:
-        obstacles.append({'rect': pygame.Rect(random.randint(10, WINWIDTH - 50), platform_height, 100, 50), 'color': RED, 'img': pygame.image.load(platform_path)})
+        #stor och liten
+        # width_of_platform = random.randint(10,250)
+        width_of_platform = 100
+        obstacles.append({'rect': pygame.Rect(random.randint(10, WINWIDTH - 50), platform_height, width_of_platform, 50), 'color': RED, 'img': pygame.transform.scale(pygame.image.load(platform_path), (width_of_platform, 50)), 'jumped_on' : False})
+        # obstacles.append({'rect': pygame.Rect(random.randint(10, WINWIDTH - 50), platform_height, 100, 50), 'color': RED, 'img': pygame.image.load(platform_path)})
         count += 1
         platform_height -= 125
+
+def randomize_obstacle_xaxis(obst):
+    x = obst['rect'].left
+    # direction 
+
 '''
     Handle which sprite to use based on playermovement
     ---
@@ -144,7 +154,7 @@ def player_sprite_direction_handler():
             new_img = jump_img_right_loaded
 
     return new_img
-# def init_globals():
+
 # GameLoop
 def game_loop():
     global REVERSED
@@ -154,7 +164,7 @@ def game_loop():
     global GROUNDED
     global PLAYER_WON
     Game = True
-    # init_globals()
+
     while Game:
         # prevent out of range 
         # global idle_img_counter
@@ -181,6 +191,7 @@ def game_loop():
             else: # Else move rect down
                 obstacle['rect'].bottom +=1 
         player.bottom += 1 # Player needs to be moved down aswell to stay fixed on top of platform
+
         '''
             Handle movement input from keyboard
         '''
@@ -196,7 +207,6 @@ def game_loop():
         if key_state[pygame.K_j] or key_state[pygame.K_LEFT] and REVERSED:
             REVERSED = False
 
-
         # Should change this to (if not GROUNDED:)
         if JUMPING or FALLING:
             # GRAVITY
@@ -206,7 +216,7 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 # HANDLE MOVEMENT INPUT
-                if GROUNDED:#for testing with double jumps or True:
+                if GROUNDED: # for testing with double jumps or True:
                     FALLING = False
                     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
                         JUMPING = True
@@ -244,6 +254,9 @@ def game_loop():
                         JUMPING = False
                         FALLING = False
                         GROUNDED = True 
+                        if not obstacle['jumped_on']:
+                            add_player_points(1)
+                            obstacle['jumped_on'] = True
                 
                 elif player.bottom > obstacle['rect'].centery:
                     # player touched bottom side, send back to ground
@@ -272,6 +285,7 @@ def game_loop():
         
         # drawing image on rect
         winSur.blit(player_surface, player)
+        create_point_label()# shows textlabel for player points
         # pygame.draw.rect(winSur,BLUE, test_rect)
 
         # Testing pixelart for platform
@@ -306,7 +320,24 @@ def menu_screen(msg = 'Press any key to start the game . . .', txt_bg_color = BL
         pygame.display.update()
         time.sleep(0.1)
     time.sleep(t_sleep)
-    
+
+def add_player_points(n):
+    global PLAYER_POINTS
+    PLAYER_POINTS += n
+    # print(f' PLAYER POINTS: {PLAYER_POINTS}')
+
+def create_point_label():
+    global PLAYER_POINTS
+
+    font = pygame.font.SysFont(None, 48)
+    points_surface  = font.render(f'Points: {PLAYER_POINTS}', True, (255,255,255), (0, 0, 0))
+    points_rect = points_surface.get_rect()
+
+    winSur.blit(points_surface, points_rect)
+
+    # return {'surface': points_surface, 'rect': points_rect}
+
+
 if __name__ == "__main__":
     menu_screen()
     game_loop()
