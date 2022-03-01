@@ -65,19 +65,20 @@ jump_img_right_loaded = scale_player_sprite(pygame.image.load(jump_img_right))
 grounded = GROUNDED
 
 '''
-    Platform path's
+    Platform  assets path's
 '''
 platform_path = "assets/platforms/mk1.png"
-#COLOR
+
+'''
+    Predefined touples with colorcodes (RGB)
+'''
 WHITE = (255, 255, 255)
 BLACK =(0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 bg = Background(BG_IMG_PATH, [0,0])
-# winSur.blit(pygame.transform.scale(bg.image, (WINWIDTH, WINHEIGHT)), bg.rect)
-# Boxes structure declaration
-# box1 = {'rect': pygame.Rect(10, WINHEIGHT - 200, 50, 60), 'color': WHITE, 'dir': UPRIGHT, 'speed': 4}
+
 '''
     Creation of inital 3 platforms
     -----
@@ -138,19 +139,15 @@ def player_sprite_direction_handler():
 
     if GROUNDED: # player IDLE
         if not REVERSED:
-            # new_img  = scale_player_sprite(pygame.image.load(idle_img_left_arr[idle_img_counter])) # WORKS NOW
             new_img = idle_img_left_loaded
             idle_img_counter +=1
         else:
-            # new_img = scale_player_sprite(pygame.image.load(idle_img_right))
             new_img = idle_img_right_loaded
 
     else: # player FALLING/JUMPING
         if not REVERSED:
-            # new_img  = scale_player_sprite(pygame.image.load(jump_img_left))
             new_img = jump_img_left_loaded
         else:
-            # new_img = scale_player_sprite(pygame.image.load(jump_img_right))
             new_img = jump_img_right_loaded
 
     return new_img
@@ -166,22 +163,19 @@ def game_loop():
     Game = True
 
     while Game:
-        # prevent out of range 
-        # global idle_img_counter
-        
-        # if idle_img_counter +1 >= 8:
-        #     idle_img_counter = 0
-        # this needs to be moved into directionhandler func
-        player_surface = player_sprite_direction_handler()
+        player_surface = player_sprite_direction_handler() # Handler for direction of sprite
 
         '''
             Check win / loose condition
+            --
+            Causes the game to end
         '''
         if player.top <= 0:
             PLAYER_WON = True
             Game = False
         elif player.bottom == WINHEIGHT:
             Game = False
+
         '''
             Remove platforms when they reach the bottom
         '''
@@ -193,7 +187,7 @@ def game_loop():
         player.bottom += 1 # Player needs to be moved down aswell to stay fixed on top of platform
 
         '''
-            Handle movement input from keyboard
+            Handle horizontal movement input from keyboard
         '''
         key_state = pygame.key.get_pressed() # get keyboardstate
         player.left +=  (key_state[pygame.K_RIGHT] * MOVESPEED) - (key_state[pygame.K_LEFT] * MOVESPEED)
@@ -215,8 +209,8 @@ def game_loop():
             ACCEL += 0.1
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                # HANDLE MOVEMENT INPUT
-                if GROUNDED: # for testing with double jumps or True:
+                # HANDLE JUMPING INPUT
+                if GROUNDED: # Prevent "air"jumps
                     FALLING = False
                     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
                         JUMPING = True
@@ -229,10 +223,9 @@ def game_loop():
                 pygame.quit()
                 sys.exit()
 
-        # winSur.fill(BLACK) # adds black background
-        # bg = Background(pygame.transform.scale(BG_IMG_PATH, (WINWIDTH, WINHEIGHT)),[0,0])
-        # bg = Background(BG_IMG_PATH, [0,0])
+        # Draw Background
         winSur.blit(pygame.transform.scale(bg.image, (WINWIDTH, WINHEIGHT)), bg.rect)
+
         # check if player on ground
         if player.bottom > WINHEIGHT:
             ACCEL = 1
@@ -283,13 +276,9 @@ def game_loop():
         for obst in obstacles: 
             winSur.blit(obst['img'], obst['rect'])
         
-        # drawing image on rect
+        # Draw player
         winSur.blit(player_surface, player)
         create_point_label()# shows textlabel for player points
-        # pygame.draw.rect(winSur,BLUE, test_rect)
-
-        # Testing pixelart for platform
-        # winSur.blit(test_obst, test_rect)
 
         pygame.display.update()
 
@@ -324,7 +313,6 @@ def menu_screen(msg = 'Press any key to start the game . . .', txt_bg_color = BL
 def add_player_points(n):
     global PLAYER_POINTS
     PLAYER_POINTS += n
-    # print(f' PLAYER POINTS: {PLAYER_POINTS}')
 
 def create_point_label():
     global PLAYER_POINTS
@@ -334,9 +322,6 @@ def create_point_label():
     points_rect = points_surface.get_rect()
 
     winSur.blit(points_surface, points_rect)
-
-    # return {'surface': points_surface, 'rect': points_rect}
-
 
 if __name__ == "__main__":
     menu_screen()
