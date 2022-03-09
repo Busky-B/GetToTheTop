@@ -5,6 +5,7 @@ from pygame.locals import *
 
 # local files
 from background import Background
+from player import Player
 pygame.init()
 
 WINHEIGHT = 1024
@@ -12,7 +13,7 @@ WINWIDTH = 600
 
 # main window surface
 winSur = pygame.display.set_mode((WINWIDTH, WINHEIGHT), 0 , 32)
-pygame.display.set_caption('Boxes - Platformer')
+pygame.display.set_caption('Get to the top!')
 
 BG_IMG_PATH = "assets/bg_img.png"
 # Vars for Direction
@@ -41,8 +42,15 @@ idle_img_counter = 0
     -----
     Used by player_sprite_direction_handler()
 '''
+def scale_sprite(surface, width, height):
+    # return pygame.transform.scale(surface(width, height))
+    pass
 def scale_player_sprite(surf):
     return pygame.transform.scale(surf, (50, 60))
+
+'''
+    Array for storing the IDLE sprites for player character
+'''
 idle_img_left_arr = [
     "assets/MascotBunnyCharacter/Bunny1/01-Idle/idle1.png",
     "assets/MascotBunnyCharacter/Bunny1/01-Idle/idle2.png",
@@ -160,8 +168,8 @@ def game_loop():
     global ACCEL
     global GROUNDED
     global PLAYER_WON
+    
     Game = True
-
     while Game:
         player_surface = player_sprite_direction_handler() # Handler for direction of sprite
 
